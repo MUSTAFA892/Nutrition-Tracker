@@ -19,16 +19,13 @@ load_dotenv()
 app = Flask(__name__)
 
 # Set secret key for session management
-app.secret_key = "9f7a92fcd225d8be9b4f879e2e9f49e2"
-"""app.secret_key = os.getenv("FLASK_SECRET_KEY")
-"""
+app.secret_key = os.getenv("FLASK_SECRET_KEY")
+
 # Set the maximum content length for file uploads (e.g., 16MB)
 app.config['MAX_CONTENT_LENGTH'] = 5000 # 16MB limit
 
 # MongoDB configuration (URI provided in .env)
-app.config["MONGO_URI"] = "mongodb+srv://mustafatinwala6:ZdDhohe700OMzd2u@learningmongo.lof7x.mongodb.net/health?retryWrites=true&w=majority&appName=LearningMongo"
-"""app.config["MONGO_URI"] = os.getenv("MONGO_URI")"""
-
+app.config["MONGO_URI"] = os.getenv("MONGO_URI")
 mongo = PyMongo(app)
 
 # Initialize Bcrypt for password hashing
@@ -45,7 +42,7 @@ ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Initialize Google Gemini API
-genai.configure(api_key="AIzaSyDlWqhIbeFRoWHGP4DdnYDt8vo-LXGAfEQ")
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 # User model for login functionality
 class User(UserMixin):
