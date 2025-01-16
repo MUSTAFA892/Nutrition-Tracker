@@ -1,4 +1,3 @@
-Sure! Here's a sample `README.md` file for your project. You can adjust any part of it as necessary based on the specific details and functionalities of your application:
 
 ```markdown
 # Nutrition Tracker
