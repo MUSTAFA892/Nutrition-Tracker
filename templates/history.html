@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search History</title>
+    <style>
+        /* General Body Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+
+        /* Container for all content */
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background-color: #1e1e1e;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        th, td {
+            border: 1px solid #333;
+            padding: 10px;
+            text-align: left;
+            color: #e0e0e0;
+        }
+
+        th {
+            background-color: #333;
+        }
+
+        caption {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            text-align: left;
+            color: #e0e0e0;
+        }
+
+        img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        /* Nested Table for Nutritional Info */
+        .nutrition-table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+        }
+
+        .nutrition-table th, .nutrition-table td {
+            border: 1px solid #444;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .nutrition-table th {
+            background-color: #333;
+        }
+
+        /* Button Styles */
+        .go-to-main-btn, .delete-history-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 20px;
+            width: 100%;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .go-to-main-btn:hover, .delete-history-btn:hover {
+            background-color: #45a049;
+        }
+
+        .go-to-main-btn:focus, .delete-history-btn:focus {
+            outline: none;
+        }
+
+        .go-to-main-btn:active, .delete-history-btn:active {
+            background-color: #388e3c;
+        }
+
+        .delete-history-btn {
+            background-color: #d9534f;
+        }
+
+        .delete-history-btn:hover {
+            background-color: #c9302c;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            table {
+                width: 100%;
+                margin-top: 10px;
+            }
+
+            th, td {
+                font-size: 0.9rem;
+                padding: 8px;
+            }
+
+            img {
+                width: 80px;
+                height: 80px;
+            }
+        }
+
+        /* Prevent overflow and ensure content is properly spaced */
+        .history-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Your Search History</h1>
+
+        <!-- History Table -->
+        <div class="history-container">
+            <table>
+                <caption>History of Nutritional Breakdown Searches</caption>
+                <thead>
+                    <tr>
+                        <th>Image</th>
+                        <th>Nutritional Breakdown</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in history %}
+                        <tr>
+                            <td>
+                                <img src="{{ url_for('static', filename='uploads/' + entry['image_path'].split('/')[-1]) }}" alt="Food Image">
+                            </td>
+                            <td>
+                                <table class="nutrition-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Food Item</th>
+                                            <th>Calories</th>
+                                            <th>Protein</th>
+                                            <th>Carbs</th>
+                                            <th>Fats</th>
+                                            <th>Fiber</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for line in entry['response'].split('\n') %}
+                                            {% if line.startswith('1.') %}
+                                                <tr>
+                                                    <td>{{ line.split(' - ')[0] }}</td>
+                                                    <td>{{ line.split(' - ')[1].split(',')[0] }}</td>
+                                                    <td>{{ line.split('Protein: ')[1].split('g')[0] }}g</td>
+                                                    <td>{{ line.split('Carbs: ')[1].split('g')[0] }}g</td>
+                                                    <td>{{ line.split('Fats: ')[1].split('g')[0] }}g</td>
+                                                    <td>{{ line.split('Fiber: ')[1].split('g')[0] }}g</td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td>{{ entry['timestamp'].strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Buttons to Go to Main Page and Delete History -->
+        <button class="go-to-main-btn" onclick="window.location.href='{{ url_for('index') }}'">Go to Main Page</button>
+
+        <form method="POST" action="{{ url_for('delete_history') }}">
+            <button type="submit" class="delete-history-btn">Delete All History</button>
+        </form>
+    </div>
+</body>
+</html>

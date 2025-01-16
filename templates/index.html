@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nutrition Track</title>
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+            background-color: #121212;
+            color: #e0e0e0;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Container */
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: -100%; /* Ensure the container takes up at least 80% of the viewport height */
+            justify-content: flex-start; /* Aligns all content upwards */
+        }
+
+        /* Header */
+        h1 {
+            font-size: 2.2rem;
+            color: #ffffff;
+       
+        }
+
+        /* Button container */
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+            width: 100%;
+        }
+
+        .button-container div {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+
+        /* Button Styles */
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            width: 100%; /* Ensure the button takes up full width in mobile view */
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        /* Input Styles */
+        input[type="file"] {
+            border: 1px solid #333;
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            background-color: #333;
+            color: #e0e0e0;
+        }
+
+        /* Image Preview */
+        .img-preview {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            margin-top: 15px;
+            border-radius: 8px;
+        }
+
+        /* Camera Modal */
+        #camera-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #camera-container {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+        }
+
+        #camera {
+            border: 2px solid #fff;
+            border-radius: 8px;
+        }
+
+        .close-modal {
+            color: #ff4d4d;
+            font-size: 20px;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+
+        .close-modal:hover {
+            color: #c9302c;
+        }
+        
+
+        .camera-actions button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            margin: 10px;
+            border: none;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .camera-actions button:hover {
+            background-color: #45a049;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background: #1e1e1e;
+        }
+
+        th, td {
+            border: 1px solid #333;
+            padding: 10px;
+            text-align: left;
+            color: #e0e0e0;
+        }
+
+        th {
+            background-color: #333;
+        }
+
+        caption {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #e0e0e0;
+        }
+
+        /* Logout Button */
+        .logout-button {
+            background-color: #d9534f;
+            margin-top: 10px;
+            margin-bottom: 10px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .logout-button:hover {
+            background-color: #c9302c;
+        }
+
+        /* Ensure the content doesn't overflow or push up */
+        .response-container {
+            margin-top: 30px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+                padding: 15px;
+            }
+
+            button, .logout-button {
+                width: 100%;
+            }
+
+            .button-container {
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <h5 class="alert alert-{{ category }} mt-3" role="alert" 
+                style="
+                    padding: 15px; 
+                    border-radius: 8px; 
+                    font-weight: 600; 
+                    color: #ffffff; 
+                    background-color: 
+                        {% if category == 'success' %} #28a745; 
+                        {% elif category == 'info' %} #17a2b8; 
+                        {% elif category == 'warning' %} #ffc107; 
+                        {% elif category == 'danger' %} #dc3545; 
+                        {% else %} #6c757d; {% endif %}
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                ">
+                {{ message }}
+            </h5>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+
+    <div class="container">
+        <h1>Nutrition Track</h1>
+
+        <!-- Logout Button -->
+        <div>
+            <a href="{{ url_for('logout') }}">
+                <button type="button" class="logout-button">Logout</button>
+            </a>
+        </div>
+
+        <!-- History Button -->
+        <div>
+            <a href="{{ url_for('history') }}">
+                <button type="button">View History</button>
+            </a>
+        </div>
+
+        <!-- Form for uploading the image or capturing it from the camera -->
+        <form method="POST" enctype="multipart/form-data">
+            <div class="button-container">
+                <!-- File upload option -->
+                <div>
+                    <label for="image">Upload Food Image:</label>
+                    <input type="file" name="image" id="image" accept=".jpg,.jpeg,.png" onchange="toggleCaptureOptions('upload')">
+                    <div id="image-preview-container">
+                        <!-- Image preview will appear here -->
+                    </div>
+                </div>
+
+                <!-- Camera capture option -->
+                <div>
+                    <button type="button" id="captureButton" onclick="showCameraModal()">Capture from Camera</button>
+                    <input type="hidden" name="captured_image" id="captured_image">
+                    <div id="camera-preview-container">
+                        <!-- Camera image preview will appear here -->
+                    </div>
+                </div>
+            </div>
+
+            <br><br>
+
+            <button type="submit" id="submitButton">Tell me the total calories</button>
+        </form>
+
+        <!-- Response Section -->
+        {% if response %}
+            <div class="response-container">
+                <div style="width: 100%; overflow-x: auto;">
+                    <table>
+                        <caption>Food Item Nutritional Information</caption>
+                        <thead>
+                            <tr>
+                                <th>Food Item</th>
+                                <th>Calories</th>
+                                <th>Protein</th>
+                                <th>Carbs</th>
+                                <th>Fats</th>
+                                <th>Fiber</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for line in response.split('\n') %}
+                                {% if line.startswith('1.') %}
+                                    <tr>
+                                        <td>{{ line.split(' - ')[0] }}</td>
+                                        <td>{{ line.split(' - ')[1].split(',')[0] }}</td>
+                                        <td>{{ line.split('Protein: ')[1].split('g')[0] }}g</td>
+                                        <td>{{ line.split('Carbs: ')[1].split('g')[0] }}g</td>
+                                        <td>{{ line.split('Fats: ')[1].split('g')[0] }}g</td>
+                                        <td>{{ line.split('Fiber: ')[1].split('g')[0] }}g</td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <table>
+                        <caption>Total Nutritional Breakdown</caption>
+                        <thead>
+                            <tr>
+                                <th>Total Calories</th>
+                                <th>Total Protein</th>
+                                <th>Total Carbs</th>
+                                <th>Total Fats</th>
+                                <th>Total Fiber</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ response.split('Total Calories: ')[1].split('\n')[0] }}</td>
+                                <td>{{ response.split('Total Protein: ')[1].split('\n')[0] }}</td>
+                                <td>{{ response.split('Total Carbs: ')[1].split('\n')[0] }}</td>
+                                <td>{{ response.split('Total Fats: ')[1].split('\n')[0] }}</td>
+                                <td>{{ response.split('Total Fiber: ')[1].split('\n')[0] }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <button type="button" class="clear-response-btn" onclick="clearResponse()">Clear Response</button>
+            </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Show the camera modal when the button is clicked
+        function showCameraModal() {
+            if (navigator.userAgent.match(/mobile/i)) {
+                const cameraInput = document.createElement('input');
+                cameraInput.type = 'file';
+                cameraInput.accept = 'image/*';
+                cameraInput.capture = 'camera';
+                cameraInput.style.display = 'none';
+                cameraInput.onchange = function () {
+                    const file = cameraInput.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = function (event) {
+                            const base64Image = event.target.result;
+                            document.getElementById('captured_image').value = base64Image;
+                            const previewImg = document.createElement('img');
+                            previewImg.src = base64Image;
+                            previewImg.className = "img-preview";
+                            document.getElementById('camera-preview-container').innerHTML = '';
+                            document.getElementById('camera-preview-container').appendChild(previewImg);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+                cameraInput.click(); // Trigger file input for mobile camera
+            } else {
+                document.getElementById('camera-modal').style.display = 'flex';
+                startCamera();
+            }
+        }
+
+        // Close the camera modal
+        function closeCameraModal() {
+            document.getElementById('camera-modal').style.display = 'none';
+            stopCamera();
+        }
+
+        // Start the camera using getUserMedia
+        async function startCamera() {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            const camera = document.getElementById('camera');
+            camera.srcObject = stream;
+        }
+
+        // Stop the camera stream when modal is closed
+        function stopCamera() {
+            const stream = document.getElementById('camera').srcObject;
+            const tracks = stream.getTracks();
+            tracks.forEach(track => track.stop());
+        }
+
+        // Capture an image from the camera
+        function captureImage() {
+            const canvas = document.getElementById('camera-canvas');
+            const context = canvas.getContext('2d');
+            const camera = document.getElementById('camera');
+            context.drawImage(camera, 0, 0, canvas.width, canvas.height);
+            const dataUrl = canvas.toDataURL('image/png');
+            document.getElementById('captured_image').value = dataUrl;
+            closeCameraModal();
+        }
+
+        // Toggle the visibility of the file upload and camera buttons
+        function toggleCaptureOptions(option) {
+            if (option === 'upload') {
+                document.getElementById('captureButton').disabled = true; 
+            } else {
+                document.getElementById('captureButton').disabled = false;
+            }
+        }
+
+        // Clear the current response and re-enable the search options
+        function clearResponse() {
+            document.querySelector('.response-container').style.display = 'none';
+            document.getElementById('submitButton').disabled = false;
+            document.getElementById('image').disabled = false;
+            document.getElementById('captureButton').disabled = false;
+            document.getElementById('image-preview-container').innerHTML = '';
+            document.getElementById('camera-preview-container').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

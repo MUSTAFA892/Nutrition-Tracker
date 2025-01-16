@@ -1,0 +1,8 @@
+google-generativeai
+python-dotenv
+flask
+flask-pymongo 
+flask-login 
+flask-wtf
+flask-bcrypt
+werkzeug
