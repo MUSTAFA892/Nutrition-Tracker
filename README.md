@@ -1,5 +1,5 @@
 
-```markdown
+
 # Nutrition Tracker
 
 This is a Flask-based web application for calculating nutritional information from images of food items. Users can upload food images or capture photos using their mobile devices. The app uses Google's Gemini API for extracting nutritional details from food images.
